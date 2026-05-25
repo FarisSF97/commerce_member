@@ -15,6 +15,22 @@ router.get("/logout", (req, res) => {
   auth.logout(req, res);
 });
 
+router.get("/forgot-password", (req, res) => {
+  auth.forgotPassword(req, res);
+});
+
+router.post("/process_forgot_password", async (req, res) => {
+  auth.processForgotPassword(req, res);
+});
+
+router.get("/reset-password/:token", async (req, res) => {
+  auth.resetPassword(req, res);
+});
+
+router.post("/process_reset_password", async (req, res) => {
+  auth.processResetPassword(req, res);
+});
+
 router.post("/process_cancel_order", async (req, res) => {
   member.cancelOrder(req, res);
 });
