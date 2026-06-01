@@ -102,6 +102,36 @@ const auth = {
         message: error.response?.data?.message || 'Gagal mereset password'
       });
     }
+  },
+
+  changePassword: async (req, res) => {
+    try {
+      const { password } = req.body;
+      const user = req.session.user;
+
+      if (!user || !user.email) {
+        return res.status(401).json({ status: 'failed', message: 'Silakan login terlebih dahulu' });
+      }
+
+      if (!password || password.length < 4) {
+        return res.status(400).json({ status: 'failed', message: 'Password minimal 4 karakter' });
+      }
+
+      const apiResponse = await axios.post(`${API_BASE_URL}/change_password`, {
+        email: user.email,
+        password: password
+      }, {
+        withCredentials: true
+      });
+
+      return res.json(apiResponse.data);
+    } catch (error) {
+      console.error('Change password error:', error);
+      return res.status(500).json({
+        status: 'failed',
+        message: 'Terjadi kesalahan. Silakan coba lagi.'
+      });
+    }
   }
 };
 

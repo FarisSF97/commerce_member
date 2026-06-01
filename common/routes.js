@@ -31,6 +31,10 @@ router.post("/process_reset_password", async (req, res) => {
   auth.processResetPassword(req, res);
 });
 
+router.post("/process_change_password", async (req, res) => {
+  auth.changePassword(req, res);
+});
+
 router.post("/process_cancel_order", async (req, res) => {
   member.cancelOrder(req, res);
 });

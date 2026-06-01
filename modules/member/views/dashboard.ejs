@@ -103,6 +103,9 @@
       <button class="tab-btn active" data-tab="info">
         <i class="fas fa-user"></i> Info Akun
       </button>
+      <button class="tab-btn" data-tab="security">
+        <i class="fas fa-shield-alt"></i> Keamanan Akun
+      </button>
       <button class="tab-btn" data-tab="orders">
         <i class="fas fa-shopping-cart"></i> Riwayat Pesanan
       </button>
@@ -121,6 +124,22 @@
         <span class="info-label">WhatsApp</span>
         <span class="info-value"><%= user.whatsapp || '-' %></span>
       </div>
+    </div>
+
+    <div class="tab-content" id="tab-security">
+      <h3 style="margin-bottom: 20px; color: #495057;"><i class="fas fa-key"></i> Ubah Password</h3>
+      <form id="changePasswordForm" style="max-width: 400px;">
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #333; font-size: 14px;">Password Baru</label>
+          <input type="password" id="newPassword" placeholder="Minimal 4 karakter" minlength="4" required style="width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px;">
+        </div>
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #333; font-size: 14px;">Konfirmasi Password</label>
+          <input type="password" id="confirmPassword" placeholder="Ketik ulang password" required style="width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px;">
+        </div>
+        <button type="submit" style="padding: 12px 30px; background: #007bff; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer;">Simpan Password</button>
+        <div id="password-message" style="display: none; margin-top: 12px; padding: 12px; border-radius: 8px; font-size: 14px;"></div>
+      </form>
     </div>
 
     <div class="tab-content" id="tab-orders">
@@ -215,6 +234,56 @@
           btn.textContent = 'Cancel';
         }
       });
+    });
+
+    // Change password
+    document.getElementById('changePasswordForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const newPassword = document.getElementById('newPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      const msg = document.getElementById('password-message');
+      const btn = this.querySelector('button[type="submit"]');
+
+      msg.style.display = 'none';
+
+      if (newPassword !== confirmPassword) {
+        msg.style.display = 'block'; msg.style.background = '#f8d7da'; msg.style.color = '#721c24';
+        msg.textContent = 'Password tidak cocok!'; return;
+      }
+
+      if (newPassword.length < 4) {
+        msg.style.display = 'block'; msg.style.background = '#f8d7da'; msg.style.color = '#721c24';
+        msg.textContent = 'Password minimal 4 karakter!'; return;
+      }
+
+      btn.disabled = true; btn.textContent = 'Menyimpan...';
+
+      try {
+        const response = await fetch('/process_change_password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: newPassword }),
+          credentials: 'include'
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'success') {
+          msg.style.display = 'block'; msg.style.background = '#d4edda'; msg.style.color = '#155724';
+          msg.textContent = 'Password berhasil diubah!';
+          document.getElementById('newPassword').value = '';
+          document.getElementById('confirmPassword').value = '';
+        } else {
+          msg.style.display = 'block'; msg.style.background = '#f8d7da'; msg.style.color = '#721c24';
+          msg.textContent = data.message || 'Gagal ubah password';
+        }
+      } catch (error) {
+        msg.style.display = 'block'; msg.style.background = '#f8d7da'; msg.style.color = '#721c24';
+        msg.textContent = 'Terjadi kesalahan. Silakan coba lagi.';
+      } finally {
+        btn.disabled = false; btn.textContent = 'Simpan Password';
+      }
     });
   </script>
 </body>
