@@ -136,6 +136,37 @@
       display: none; margin-top: 12px; padding: 12px;
       border-radius: 8px; font-size: 14px;
     }
+
+    .btn-detail {
+      padding: 6px 14px; background: #007bff; color: white;
+      border: none; border-radius: 6px; font-size: 13px;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .btn-detail:hover { background: #0056b3; }
+    .btn-detail:disabled { background: #ccc; cursor: not-allowed; }
+
+    .detail-table { width: 100%; border-collapse: collapse; }
+    .detail-table td {
+      padding: 10px 0; border-bottom: 1px solid #f0f0f0;
+      font-size: 14px;
+    }
+    .detail-table td:first-child {
+      color: #666; font-weight: 600; width: 40%;
+    }
+    .detail-table td:last-child { color: #333; text-align: right; }
+    .detail-total td { font-weight: 700; font-size: 16px; color: #27ae60; border-bottom: none; padding-top: 12px; }
+    .detail-divider td { border-bottom: 2px solid #dee2e6; padding: 0; }
+    .detail-title { font-size: 18px; font-weight: 700; color: #333; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .detail-close {
+      position: absolute; top: 16px; right: 20px;
+      font-size: 24px; color: #999; cursor: pointer;
+      background: none; border: none;
+    }
+    .detail-close:hover { color: #333; }
+    .modal-box-order {
+      background: white; border-radius: 12px; padding: 30px; width: 90%; max-width: 460px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2); position: relative;
+    }
   </style>
 </head>
 <body>
@@ -200,6 +231,7 @@
           <thead>
             <tr>
               <th>Invoice</th>
+              <th>Tanggal</th>
               <th>Produk</th>
               <th>Qty</th>
               <th>Total</th>
@@ -209,8 +241,9 @@
           </thead>
           <tbody>
             <% orders.forEach(function(order) { %>
-              <tr>
+              <tr data-order='<%= JSON.stringify(order).replace(/'/g, "&#39;") %>'>
                 <td><%= order.invoice %></td>
+                <td><%= order.created_at ? new Date(order.created_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '-' %></td>
                 <td><%= order.product_name %></td>
                 <td><%= order.qty %></td>
                 <td>Rp<%= parseInt(order.total).toLocaleString('id-ID') %></td>
@@ -220,12 +253,11 @@
                   </span>
                 </td>
                 <td>
+                  <button type="button" class="btn-detail" onclick="showOrderDetail(this)">Detail</button>
                   <% if (order.status === 'pending') { %>
-                    <form class="cancel-form" data-order-id="<%= order.id %>">
+                    <form class="cancel-form" data-order-id="<%= order.id %>" style="display:inline">
                       <button type="submit" class="btn-cancel">Cancel</button>
                     </form>
-                  <% } else { %>
-                    -
                   <% } %>
                 </td>
               </tr>
@@ -259,6 +291,34 @@
           <button type="submit" class="btn-primary" id="editSaveBtn">Simpan</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Order Detail Modal -->
+  <div class="modal-overlay" id="orderDetailModal">
+    <div class="modal-box-order">
+      <button class="detail-close" onclick="closeOrderDetail()">&times;</button>
+      <div class="detail-title"><i class="fas fa-receipt"></i> Detail Pesanan</div>
+      <table class="detail-table" id="orderDetailTable">
+        <tr><td>Invoice</td><td id="od-invoice">-</td></tr>
+        <tr><td>Tanggal</td><td id="od-tanggal">-</td></tr>
+        <tr><td>Produk</td><td id="od-product">-</td></tr>
+        <tr><td>Harga</td><td id="od-harga">-</td></tr>
+        <tr><td>Jumlah</td><td id="od-qty">-</td></tr>
+        <tr><td>Subtotal</td><td id="od-subtotal">-</td></tr>
+        <tr><td>Diskon</td><td id="od-diskon">-</td></tr>
+        <tr><td>Kode Unik</td><td id="od-kodeunik">-</td></tr>
+        <tr class="detail-divider"><td colspan="2"></td></tr>
+        <tr class="detail-total"><td>Total</td><td id="od-total">-</td></tr>
+        <tr><td>Status</td><td id="od-status">-</td></tr>
+        <tr class="detail-divider"><td colspan="2"></td></tr>
+        <tr><td>Bank</td><td id="od-bank">-</td></tr>
+        <tr><td>No Rekening</td><td id="od-rekening">-</td></tr>
+        <tr><td>Atas Nama</td><td id="od-atasnama">-</td></tr>
+      </table>
+      <div class="modal-actions" style="margin-top:20px">
+        <button type="button" class="btn-primary" onclick="closeOrderDetail()">Tutup</button>
+      </div>
     </div>
   </div>
 
@@ -422,6 +482,52 @@
         editMsg.textContent = 'Terjadi kesalahan. Silakan coba lagi.';
         editSaveBtn.disabled = false; editSaveBtn.textContent = 'Simpan';
       }
+    });
+
+    // Order detail modal
+    function showOrderDetail(btn) {
+      const tr = btn.closest('tr');
+      let order;
+      try {
+        order = JSON.parse(tr.dataset.order);
+      } catch(e) {
+        alert('Gagal memuat detail pesanan');
+        return;
+      }
+
+      const statusMap = { pending: 'Pending', paid: 'Lunas', cancel: 'Cancel' };
+      const discount = parseInt(order.diskon_jumlah) || 0;
+      const kodeUnik = parseInt(order.kode_unik) || 0;
+
+      document.getElementById('od-invoice').textContent = order.invoice || '-';
+      document.getElementById('od-tanggal').textContent = order.created_at ? new Date(order.created_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '-';
+      document.getElementById('od-product').textContent = order.product_name || '-';
+      document.getElementById('od-harga').textContent = 'Rp' + (parseInt(order.harga) || 0).toLocaleString('id-ID');
+      document.getElementById('od-qty').textContent = order.qty || '-';
+      document.getElementById('od-subtotal').textContent = 'Rp' + (parseInt(order.subtotal) || 0).toLocaleString('id-ID');
+      document.getElementById('od-diskon').textContent = discount > 0 ? '-Rp' + discount.toLocaleString('id-ID') : 'Rp0';
+      document.getElementById('od-kodeunik').textContent = kodeUnik > 0 ? '-Rp' + kodeUnik.toLocaleString('id-ID') : 'Rp0';
+      document.getElementById('od-total').textContent = 'Rp' + (parseInt(order.total) || 0).toLocaleString('id-ID');
+      document.getElementById('od-status').textContent = statusMap[order.status] || order.status || '-';
+
+      const statusEl = document.getElementById('od-status');
+      if (order.status === 'paid') statusEl.style.color = '#155724';
+      else if (order.status === 'cancel') statusEl.style.color = '#721c24';
+      else statusEl.style.color = '#856404';
+
+      document.getElementById('od-bank').textContent = order.bank_name || '-';
+      document.getElementById('od-rekening').textContent = order.bank_account || '-';
+      document.getElementById('od-atasnama').textContent = order.bank_owner || '-';
+
+      document.getElementById('orderDetailModal').classList.add('active');
+    }
+
+    function closeOrderDetail() {
+      document.getElementById('orderDetailModal').classList.remove('active');
+    }
+
+    document.getElementById('orderDetailModal').addEventListener('click', function(e) {
+      if (e.target === this) closeOrderDetail();
     });
   </script>
 </body>
