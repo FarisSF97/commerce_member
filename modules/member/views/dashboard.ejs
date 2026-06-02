@@ -114,6 +114,24 @@
     }
     .page-dots { padding: 0 4px; color: #6c757d; font-size: 14px; }
 
+    .search-form { display: flex; gap: 8px; margin-bottom: 20px; }
+    .search-input {
+      flex: 1; padding: 10px 14px; border: 1px solid #ddd;
+      border-radius: 8px; font-size: 14px; outline: none;
+    }
+    .search-input:focus { border-color: #007bff; }
+    .search-btn {
+      padding: 10px 16px; background: #007bff; color: white;
+      border: none; border-radius: 8px; cursor: pointer; font-size: 14px;
+    }
+    .search-btn:hover { background: #0056b3; }
+    .search-clear {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 40px; border: 1px solid #ddd; border-radius: 8px;
+      text-decoration: none; color: #666; font-size: 20px;
+    }
+    .search-clear:hover { background: #f8f9fa; }
+
     .btn-edit {
       display: inline-block; margin-top: 20px; padding: 10px 24px;
       background: #007bff; color: white; border: none; border-radius: 8px;
@@ -244,10 +262,17 @@
     </div>
 
     <div class="tab-content <%= activeTab === 'orders' ? 'active' : '' %>" id="tab-orders">
+      <form class="search-form" method="GET">
+        <input type="hidden" name="tab" value="orders">
+        <input type="text" name="search" class="search-input" placeholder="Cari invoice atau produk..." value="<%= search %>">
+        <button type="submit" class="search-btn"><i class="fas fa-search"></i></button>
+        <% if (search) { %><a href="?tab=orders" class="search-clear">&times;</a><% } %>
+      </form>
+
       <% if (orders.length === 0) { %>
         <div class="empty-state">
           <i class="fas fa-shopping-bag"></i>
-          <p>Belum ada pesanan.</p>
+          <p><%= search ? 'Tidak ada hasil untuk "' + search + '".' : 'Belum ada pesanan.' %></p>
         </div>
       <% } else { %>
         <div class="table-wrap"><table class="order-table">
@@ -285,7 +310,7 @@
         <% if (totalPages > 1) { %>
           <div class="pagination">
             <% if (page > 1) { %>
-              <a href="?tab=orders&page=<%= page - 1 %>" class="page-btn">&laquo; Prev</a>
+              <a href="?tab=orders&search=<%= encodeURIComponent(search) %>&page=<%= page - 1 %>" class="page-btn">&laquo; Prev</a>
             <% } else { %>
               <button class="page-btn" disabled>&laquo; Prev</button>
             <% } %>
@@ -293,14 +318,15 @@
             <%
               var s = Math.max(1, page - 2);
               var e = Math.min(totalPages, page + 2);
-              if (s > 1) { %><a href="?tab=orders&page=1" class="page-btn">1</a><% if (s > 2) { %><span class="page-dots">...</span><% } } %>
+              function pUrl(p) { return '?tab=orders&search=' + encodeURIComponent(search) + '&page=' + p; }
+              if (s > 1) { %><a href="<%= pUrl(1) %>" class="page-btn">1</a><% if (s > 2) { %><span class="page-dots">...</span><% } } %>
             <% for (var i = s; i <= e; i++) { %>
-              <% if (i === page) { %><span class="page-btn active"><%= i %></span><% } else { %><a href="?tab=orders&page=<%= i %>" class="page-btn"><%= i %></a><% } %>
+              <% if (i === page) { %><span class="page-btn active"><%= i %></span><% } else { %><a href="<%= pUrl(i) %>" class="page-btn"><%= i %></a><% } %>
             <% } %>
-            <% if (e < totalPages) { %><% if (e < totalPages - 1) { %><span class="page-dots">...</span><% } %><a href="?tab=orders&page=<%= totalPages %>" class="page-btn"><%= totalPages %></a><% } %>
+            <% if (e < totalPages) { %><% if (e < totalPages - 1) { %><span class="page-dots">...</span><% } %><a href="<%= pUrl(totalPages) %>" class="page-btn"><%= totalPages %></a><% } %>
 
             <% if (page < totalPages) { %>
-              <a href="?tab=orders&page=<%= page + 1 %>" class="page-btn">Next &raquo;</a>
+              <a href="?tab=orders&search=<%= encodeURIComponent(search) %>&page=<%= page + 1 %>" class="page-btn">Next &raquo;</a>
             <% } else { %>
               <button class="page-btn" disabled>Next &raquo;</button>
             <% } %>

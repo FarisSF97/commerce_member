@@ -77,12 +77,13 @@ const member = {
     const accountId = user.id;
     const page = parseInt(req.query.page) || 1;
     const limit = 10;
+    const search = (req.query.search || '').trim();
     const validTabs = ['info', 'security', 'orders'];
     const activeTab = validTabs.includes(req.query.tab) ? req.query.tab : 'info';
 
     try {
       const ordersRes = await axios.get(`${API_BASE_URL}/get_orders/${accountId}`, {
-        params: { page, limit },
+        params: { page, limit, search },
         withCredentials: true
       });
 
@@ -96,7 +97,8 @@ const member = {
         totalPages: pagination.totalPages,
         total: pagination.total,
         limit: pagination.limit,
-        activeTab: activeTab
+        activeTab: activeTab,
+        search: search
       });
     } catch (error) {
       console.error('Dashboard error:', error);
@@ -107,7 +109,8 @@ const member = {
         totalPages: 1,
         total: 0,
         limit: 10,
-        activeTab: activeTab
+        activeTab: activeTab,
+        search: search
       });
     }
   }
