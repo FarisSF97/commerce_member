@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard - Telegram Booster</title>
-  <script src="https://kit.fontawesome.com/bba4075092.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -364,6 +364,7 @@
         <tr><td>Atas Nama</td><td id="od-atasnama">-</td></tr>
       </table>
       <div class="modal-actions" style="margin-top:20px">
+        <button type="button" class="btn-cancel" id="modalCancelBtn" style="display:none;padding:12px 24px;font-size:15px">Cancel Pesanan</button>
         <button type="button" class="btn-primary" onclick="closeOrderDetail()">Tutup</button>
       </div>
     </div>
@@ -556,6 +557,16 @@
       document.getElementById('od-rekening').textContent = order.bank_account || '-';
       document.getElementById('od-atasnama').textContent = order.bank_owner || '-';
 
+      const modalCancelBtn = document.getElementById('modalCancelBtn');
+      if (order.status === 'pending') {
+        modalCancelBtn.style.display = 'inline-block';
+        modalCancelBtn.dataset.orderId = order.id;
+        modalCancelBtn.disabled = false;
+        modalCancelBtn.textContent = 'Cancel Pesanan';
+      } else {
+        modalCancelBtn.style.display = 'none';
+      }
+
       document.getElementById('orderDetailModal').classList.add('active');
     }
 
@@ -565,6 +576,37 @@
 
     document.getElementById('orderDetailModal').addEventListener('click', function(e) {
       if (e.target === this) closeOrderDetail();
+    });
+
+    // Cancel from modal detail
+    document.getElementById('modalCancelBtn').addEventListener('click', async function() {
+      if (!confirm('Yakin ingin cancel pesanan ini?')) return;
+
+      const orderId = this.dataset.orderId;
+      this.disabled = true;
+      this.textContent = 'Memproses...';
+
+      try {
+        const response = await fetch('/process_cancel_order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ order_id: orderId }),
+          credentials: 'include'
+        });
+
+        const data = await response.json();
+        if (data.status === 'success') {
+          location.reload();
+        } else {
+          alert(data.message || 'Gagal cancel pesanan');
+          this.disabled = false;
+          this.textContent = 'Cancel Pesanan';
+        }
+      } catch (error) {
+        alert('Terjadi kesalahan. Silakan coba lagi.');
+        this.disabled = false;
+        this.textContent = 'Cancel Pesanan';
+      }
     });
   </script>
 </body>
