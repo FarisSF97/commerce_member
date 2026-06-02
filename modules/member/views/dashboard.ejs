@@ -259,7 +259,7 @@
               <th>Qty</th>
               <th>Total</th>
               <th>Status</th>
-              <th>Aksi</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -277,11 +277,6 @@
                 </td>
                 <td>
                   <button type="button" class="btn-detail" onclick="showOrderDetail(this)">Detail</button>
-                  <% if (order.status === 'pending') { %>
-                    <form class="cancel-form" data-order-id="<%= order.id %>" style="display:inline">
-                      <button type="submit" class="btn-cancel">Cancel</button>
-                    </form>
-                  <% } %>
                 </td>
               </tr>
             <% }); %>
@@ -371,42 +366,6 @@
   </div>
 
   <script>
-    // Cancel order
-    document.querySelectorAll('.cancel-form').forEach(form => {
-      form.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        if (!confirm('Yakin ingin cancel pesanan ini?')) return;
-
-        const orderId = this.dataset.orderId;
-        const btn = this.querySelector('.btn-cancel');
-        btn.disabled = true;
-        btn.textContent = 'Memproses...';
-
-        try {
-          const response = await fetch('/process_cancel_order', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ order_id: orderId }),
-            credentials: 'include'
-          });
-
-          const data = await response.json();
-
-          if (data.status === 'success') {
-            location.reload();
-          } else {
-            alert(data.message || 'Gagal cancel pesanan');
-            btn.disabled = false;
-            btn.textContent = 'Cancel';
-          }
-        } catch (error) {
-          alert('Terjadi kesalahan. Silakan coba lagi.');
-          btn.disabled = false;
-          btn.textContent = 'Cancel';
-        }
-      });
-    });
-
     // Change password
     document.getElementById('changePasswordForm').addEventListener('submit', async function(e) {
       e.preventDefault();
