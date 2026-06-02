@@ -132,6 +132,10 @@
     }
     .search-clear:hover { background: #f8f9fa; }
 
+    .sortable { text-decoration: none; color: inherit; cursor: pointer; white-space: nowrap; }
+    .sortable:hover { color: #007bff; }
+    .sort-arrow { font-size: 11px; margin-left: 4px; }
+
     .btn-edit {
       display: inline-block; margin-top: 20px; padding: 10px 24px;
       background: #007bff; color: white; border: none; border-radius: 8px;
@@ -278,12 +282,22 @@
         <div class="table-wrap"><table class="order-table">
           <thead>
             <tr>
-              <th>Invoice</th>
-              <th>Tanggal</th>
-              <th>Produk</th>
-              <th>Qty</th>
-              <th>Total</th>
-              <th>Status</th>
+              <%
+                function sortUrl(col) {
+                  var dir = sort_by === col ? (sort_dir === 'ASC' ? 'DESC' : 'ASC') : 'ASC';
+                  return '?tab=orders&search=' + encodeURIComponent(search) + '&sort_by=' + col + '&sort_dir=' + dir + '&page=1';
+                }
+                function sortArrow(col) {
+                  if (sort_by !== col) return '';
+                  return '<span class="sort-arrow">' + (sort_dir === 'ASC' ? '&#9650;' : '&#9660;') + '</span>';
+                }
+              %>
+              <th><a href="<%= sortUrl('invoice') %>" class="sortable">Invoice<%- sortArrow('invoice') %></a></th>
+              <th><a href="<%= sortUrl('tanggal') %>" class="sortable">Tanggal<%- sortArrow('tanggal') %></a></th>
+              <th><a href="<%= sortUrl('produk') %>" class="sortable">Produk<%- sortArrow('produk') %></a></th>
+              <th><a href="<%= sortUrl('qty') %>" class="sortable">Qty<%- sortArrow('qty') %></a></th>
+              <th><a href="<%= sortUrl('total') %>" class="sortable">Total<%- sortArrow('total') %></a></th>
+              <th><a href="<%= sortUrl('status') %>" class="sortable">Status<%- sortArrow('status') %></a></th>
               <th></th>
             </tr>
           </thead>
@@ -310,7 +324,7 @@
         <% if (totalPages > 1) { %>
           <div class="pagination">
             <% if (page > 1) { %>
-              <a href="?tab=orders&search=<%= encodeURIComponent(search) %>&page=<%= page - 1 %>" class="page-btn">&laquo; Prev</a>
+              <a href="?tab=orders&search=<%= encodeURIComponent(search) %>&sort_by=<%= sort_by %>&sort_dir=<%= sort_dir %>&page=<%= page - 1 %>" class="page-btn">&laquo; Prev</a>
             <% } else { %>
               <button class="page-btn" disabled>&laquo; Prev</button>
             <% } %>
@@ -318,7 +332,7 @@
             <%
               var s = Math.max(1, page - 2);
               var e = Math.min(totalPages, page + 2);
-              function pUrl(p) { return '?tab=orders&search=' + encodeURIComponent(search) + '&page=' + p; }
+              function pUrl(p) { return '?tab=orders&search=' + encodeURIComponent(search) + '&sort_by=' + sort_by + '&sort_dir=' + sort_dir + '&page=' + p; }
               if (s > 1) { %><a href="<%= pUrl(1) %>" class="page-btn">1</a><% if (s > 2) { %><span class="page-dots">...</span><% } } %>
             <% for (var i = s; i <= e; i++) { %>
               <% if (i === page) { %><span class="page-btn active"><%= i %></span><% } else { %><a href="<%= pUrl(i) %>" class="page-btn"><%= i %></a><% } %>
@@ -326,7 +340,7 @@
             <% if (e < totalPages) { %><% if (e < totalPages - 1) { %><span class="page-dots">...</span><% } %><a href="<%= pUrl(totalPages) %>" class="page-btn"><%= totalPages %></a><% } %>
 
             <% if (page < totalPages) { %>
-              <a href="?tab=orders&search=<%= encodeURIComponent(search) %>&page=<%= page + 1 %>" class="page-btn">Next &raquo;</a>
+              <a href="?tab=orders&search=<%= encodeURIComponent(search) %>&sort_by=<%= sort_by %>&sort_dir=<%= sort_dir %>&page=<%= page + 1 %>" class="page-btn">Next &raquo;</a>
             <% } else { %>
               <button class="page-btn" disabled>Next &raquo;</button>
             <% } %>
