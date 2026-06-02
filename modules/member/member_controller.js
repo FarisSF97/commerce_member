@@ -75,23 +75,39 @@ const member = {
 
     const user = req.session.user;
     const accountId = user.id;
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10;
+    const validTabs = ['info', 'security', 'orders'];
+    const activeTab = validTabs.includes(req.query.tab) ? req.query.tab : 'info';
 
     try {
       const ordersRes = await axios.get(`${API_BASE_URL}/get_orders/${accountId}`, {
+        params: { page, limit },
         withCredentials: true
       });
 
-      const orders = ordersRes.data.status === 'success' ? ordersRes.data.data : [];
+      const orders = ordersRes.data.status === 'success' ? ordersRes.data.data.orders : [];
+      const pagination = ordersRes.data.status === 'success' ? ordersRes.data.data.pagination : { page: 1, totalPages: 1, total: 0 };
 
       return res.render('member/views/dashboard', {
         user: user,
-        orders: orders
+        orders: orders,
+        page: pagination.page,
+        totalPages: pagination.totalPages,
+        total: pagination.total,
+        limit: pagination.limit,
+        activeTab: activeTab
       });
     } catch (error) {
       console.error('Dashboard error:', error);
       return res.render('member/views/dashboard', {
         user: user,
-        orders: []
+        orders: [],
+        page: 1,
+        totalPages: 1,
+        total: 0,
+        limit: 10,
+        activeTab: activeTab
       });
     }
   }

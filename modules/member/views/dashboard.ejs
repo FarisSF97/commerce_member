@@ -40,6 +40,7 @@
       border: none; background: white; cursor: pointer;
       font-size: 15px; font-weight: 600; color: #666;
       transition: all 0.2s; border-bottom: 3px solid transparent;
+      text-decoration: none; display: block;
     }
     .tab-btn:hover { color: #333; }
     .tab-btn.active {
@@ -91,6 +92,27 @@
       text-align: center; padding: 40px; color: #999;
     }
     .empty-state i { font-size: 48px; margin-bottom: 16px; }
+
+    .pagination {
+      display: flex; justify-content: center; align-items: center;
+      gap: 6px; margin-top: 24px; flex-wrap: wrap;
+    }
+    .page-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 40px; height: 40px; padding: 0 10px;
+      border: 1px solid #dee2e6; border-radius: 8px;
+      background: white; color: #495057; font-size: 14px;
+      font-weight: 600; cursor: pointer; text-decoration: none;
+      transition: all 0.2s;
+    }
+    .page-btn:hover { background: #e9ecef; border-color: #adb5bd; }
+    .page-btn.active {
+      background: #007bff; color: white; border-color: #007bff; cursor: default;
+    }
+    .page-btn:disabled {
+      background: #e9ecef; color: #adb5bd; cursor: not-allowed; border-color: #dee2e6;
+    }
+    .page-dots { padding: 0 4px; color: #6c757d; font-size: 14px; }
 
     .btn-edit {
       display: inline-block; margin-top: 20px; padding: 10px 24px;
@@ -178,18 +200,18 @@
     </div>
 
     <div class="tabs">
-      <button class="tab-btn active" data-tab="info">
+      <a href="?tab=info" class="tab-btn <%= activeTab === 'info' ? 'active' : '' %>">
         <i class="fas fa-user"></i> Info Akun
-      </button>
-      <button class="tab-btn" data-tab="security">
+      </a>
+      <a href="?tab=security" class="tab-btn <%= activeTab === 'security' ? 'active' : '' %>">
         <i class="fas fa-shield-alt"></i> Keamanan Akun
-      </button>
-      <button class="tab-btn" data-tab="orders">
+      </a>
+      <a href="?tab=orders" class="tab-btn <%= activeTab === 'orders' ? 'active' : '' %>">
         <i class="fas fa-shopping-cart"></i> Riwayat Pesanan
-      </button>
+      </a>
     </div>
 
-    <div class="tab-content active" id="tab-info">
+    <div class="tab-content <%= activeTab === 'info' ? 'active' : '' %>" id="tab-info">
       <div class="info-row">
         <span class="info-label">Nama</span>
         <span class="info-value"><%= user.name %></span>
@@ -205,7 +227,7 @@
       <button class="btn-edit" id="editProfileBtn"><i class="fas fa-pen"></i> Edit Profile</button>
     </div>
 
-    <div class="tab-content" id="tab-security">
+    <div class="tab-content <%= activeTab === 'security' ? 'active' : '' %>" id="tab-security">
       <h3 style="margin-bottom: 20px; color: #495057;"><i class="fas fa-key"></i> Ubah Password</h3>
       <form id="changePasswordForm" style="max-width: 400px;">
         <div style="margin-bottom: 16px;">
@@ -221,7 +243,7 @@
       </form>
     </div>
 
-    <div class="tab-content" id="tab-orders">
+    <div class="tab-content <%= activeTab === 'orders' ? 'active' : '' %>" id="tab-orders">
       <% if (orders.length === 0) { %>
         <div class="empty-state">
           <i class="fas fa-shopping-bag"></i>
@@ -265,6 +287,30 @@
             <% }); %>
           </tbody>
         </table></div>
+        <% if (totalPages > 1) { %>
+          <div class="pagination">
+            <% if (page > 1) { %>
+              <a href="?tab=orders&page=<%= page - 1 %>" class="page-btn">&laquo; Prev</a>
+            <% } else { %>
+              <button class="page-btn" disabled>&laquo; Prev</button>
+            <% } %>
+
+            <%
+              var s = Math.max(1, page - 2);
+              var e = Math.min(totalPages, page + 2);
+              if (s > 1) { %><a href="?tab=orders&page=1" class="page-btn">1</a><% if (s > 2) { %><span class="page-dots">...</span><% } } %>
+            <% for (var i = s; i <= e; i++) { %>
+              <% if (i === page) { %><span class="page-btn active"><%= i %></span><% } else { %><a href="?tab=orders&page=<%= i %>" class="page-btn"><%= i %></a><% } %>
+            <% } %>
+            <% if (e < totalPages) { %><% if (e < totalPages - 1) { %><span class="page-dots">...</span><% } %><a href="?tab=orders&page=<%= totalPages %>" class="page-btn"><%= totalPages %></a><% } %>
+
+            <% if (page < totalPages) { %>
+              <a href="?tab=orders&page=<%= page + 1 %>" class="page-btn">Next &raquo;</a>
+            <% } else { %>
+              <button class="page-btn" disabled>Next &raquo;</button>
+            <% } %>
+          </div>
+        <% } %>
       <% } %>
     </div>
   </div>
@@ -324,16 +370,6 @@
   </div>
 
   <script>
-    // Tab switching
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.addEventListener('click', function() {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        this.classList.add('active');
-        document.getElementById('tab-' + this.dataset.tab).classList.add('active');
-      });
-    });
-
     // Cancel order
     document.querySelectorAll('.cancel-form').forEach(form => {
       form.addEventListener('submit', async function(e) {
