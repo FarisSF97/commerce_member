@@ -75,7 +75,26 @@ const auth = {
 
   resetPassword: async (req, res) => {
     const { token } = req.params;
-    res.render('auth/views/reset_password', { token });
+
+    if (!token) {
+      return res.render('auth/views/reset_password', { token: null, tokenValid: false, error: 'Token tidak valid' });
+    }
+
+    try {
+      const apiResponse = await axios.get(`${API_BASE_URL}/validate_reset_token/${encodeURIComponent(token)}`, {
+        withCredentials: true
+      });
+
+      if (apiResponse.data.status === 'success') {
+        return res.render('auth/views/reset_password', { token, tokenValid: true, error: null });
+      }
+
+      return res.render('auth/views/reset_password', { token: null, tokenValid: false, error: apiResponse.data.message || 'Token tidak valid atau sudah kedaluwarsa' });
+    } catch (error) {
+      console.error('Validate reset token error:', error);
+      const message = error.response?.data?.message || 'Token tidak valid atau sudah kedaluwarsa';
+      return res.render('auth/views/reset_password', { token: null, tokenValid: false, error: message });
+    }
   },
 
   processResetPassword: async (req, res) => {
