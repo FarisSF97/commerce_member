@@ -39,6 +39,10 @@ router.post("/process_cancel_order", async (req, res) => {
   member.cancelOrder(req, res);
 });
 
+router.post("/process_update_profile", async (req, res) => {
+  member.updateProfile(req, res);
+});
+
 router.get("/dashboard", async (req, res) => {
   member.dashboard(req, res);
 });
