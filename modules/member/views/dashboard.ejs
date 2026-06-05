@@ -136,6 +136,18 @@
     .sortable:hover { color: #007bff; }
     .sort-arrow { font-size: 11px; margin-left: 4px; }
 
+    .filter-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+    .filter-btn {
+      padding: 6px 16px; border: 1px solid #dee2e6; border-radius: 20px;
+      background: white; color: #495057; font-size: 13px; font-weight: 600;
+      cursor: pointer; text-decoration: none; transition: all 0.2s;
+    }
+    .filter-btn:hover { background: #e9ecef; }
+    .filter-btn.active { background: #007bff; color: white; border-color: #007bff; }
+    .filter-btn.pending-btn.active { background: #856404; border-color: #856404; }
+    .filter-btn.paid-btn.active { background: #155724; border-color: #155724; }
+    .filter-btn.cancel-btn.active { background: #721c24; border-color: #721c24; }
+
     .btn-edit {
       display: inline-block; margin-top: 20px; padding: 10px 24px;
       background: #007bff; color: white; border: none; border-radius: 8px;
@@ -273,10 +285,23 @@
         <% if (search) { %><a href="?tab=orders" class="search-clear">&times;</a><% } %>
       </form>
 
+      <%
+        function baseUrl() {
+          return '?tab=orders&search=' + encodeURIComponent(search) + '&sort_by=' + sort_by + '&sort_dir=' + sort_dir;
+        }
+      %>
+
+      <div class="filter-bar">
+        <a href="<%= baseUrl() %>&page=1" class="filter-btn <%= filter_status === '' ? 'active' : '' %>">All</a>
+        <a href="<%= baseUrl() %>&filter_status=pending&page=1" class="filter-btn pending-btn <%= filter_status === 'pending' ? 'active' : '' %>">Pending</a>
+        <a href="<%= baseUrl() %>&filter_status=paid&page=1" class="filter-btn paid-btn <%= filter_status === 'paid' ? 'active' : '' %>">Lunas</a>
+        <a href="<%= baseUrl() %>&filter_status=cancel&page=1" class="filter-btn cancel-btn <%= filter_status === 'cancel' ? 'active' : '' %>">Cancel</a>
+      </div>
+
       <% if (orders.length === 0) { %>
         <div class="empty-state">
           <i class="fas fa-shopping-bag"></i>
-          <p><%= search ? 'Tidak ada hasil untuk "' + search + '".' : 'Belum ada pesanan.' %></p>
+          <p><%= filter_status ? 'Tidak ada pesanan dengan status "' + filter_status + '".' : (search ? 'Tidak ada hasil untuk "' + search + '".' : 'Belum ada pesanan.') %></p>
         </div>
       <% } else { %>
         <div class="table-wrap"><table class="order-table">
@@ -285,7 +310,7 @@
               <%
                 function sortUrl(col) {
                   var dir = sort_by === col ? (sort_dir === 'ASC' ? 'DESC' : 'ASC') : 'ASC';
-                  return '?tab=orders&search=' + encodeURIComponent(search) + '&sort_by=' + col + '&sort_dir=' + dir + '&page=1';
+                  return '?tab=orders&search=' + encodeURIComponent(search) + '&sort_by=' + col + '&sort_dir=' + dir + (!filter_status ? '' : '&filter_status=' + filter_status) + '&page=1';
                 }
                 function sortArrow(col) {
                   if (sort_by !== col) return '';
@@ -324,7 +349,7 @@
         <% if (totalPages > 1) { %>
           <div class="pagination">
             <% if (page > 1) { %>
-              <a href="?tab=orders&search=<%= encodeURIComponent(search) %>&sort_by=<%= sort_by %>&sort_dir=<%= sort_dir %>&page=<%= page - 1 %>" class="page-btn">&laquo; Prev</a>
+              <a href="?tab=orders&search=<%= encodeURIComponent(search) %>&sort_by=<%= sort_by %>&sort_dir=<%= sort_dir %><%= !filter_status ? '' : '&filter_status=' + filter_status %>&page=<%= page - 1 %>" class="page-btn">&laquo; Prev</a>
             <% } else { %>
               <button class="page-btn" disabled>&laquo; Prev</button>
             <% } %>
@@ -332,7 +357,7 @@
             <%
               var s = Math.max(1, page - 2);
               var e = Math.min(totalPages, page + 2);
-              function pUrl(p) { return '?tab=orders&search=' + encodeURIComponent(search) + '&sort_by=' + sort_by + '&sort_dir=' + sort_dir + '&page=' + p; }
+              function pUrl(p) { return '?tab=orders&search=' + encodeURIComponent(search) + '&sort_by=' + sort_by + '&sort_dir=' + sort_dir + (!filter_status ? '' : '&filter_status=' + filter_status) + '&page=' + p; }
               if (s > 1) { %><a href="<%= pUrl(1) %>" class="page-btn">1</a><% if (s > 2) { %><span class="page-dots">...</span><% } } %>
             <% for (var i = s; i <= e; i++) { %>
               <% if (i === page) { %><span class="page-btn active"><%= i %></span><% } else { %><a href="<%= pUrl(i) %>" class="page-btn"><%= i %></a><% } %>
@@ -340,7 +365,7 @@
             <% if (e < totalPages) { %><% if (e < totalPages - 1) { %><span class="page-dots">...</span><% } %><a href="<%= pUrl(totalPages) %>" class="page-btn"><%= totalPages %></a><% } %>
 
             <% if (page < totalPages) { %>
-              <a href="?tab=orders&search=<%= encodeURIComponent(search) %>&sort_by=<%= sort_by %>&sort_dir=<%= sort_dir %>&page=<%= page + 1 %>" class="page-btn">Next &raquo;</a>
+              <a href="?tab=orders&search=<%= encodeURIComponent(search) %>&sort_by=<%= sort_by %>&sort_dir=<%= sort_dir %><%= !filter_status ? '' : '&filter_status=' + filter_status %>&page=<%= page + 1 %>" class="page-btn">Next &raquo;</a>
             <% } else { %>
               <button class="page-btn" disabled>Next &raquo;</button>
             <% } %>

@@ -83,10 +83,12 @@ const member = {
     const allowedSortBy = ['invoice', 'tanggal', 'produk', 'qty', 'total', 'status'];
     const sort_by = allowedSortBy.includes(req.query.sort_by) ? req.query.sort_by : 'tanggal';
     const sort_dir = req.query.sort_dir === 'ASC' ? 'ASC' : 'DESC';
+    const allowedStatuses = ['pending', 'paid', 'cancel'];
+    const filter_status = allowedStatuses.includes(req.query.filter_status) ? req.query.filter_status : '';
 
     try {
       const ordersRes = await axios.get(`${API_BASE_URL}/get_orders/${accountId}`, {
-        params: { page, limit, search, sort_by, sort_dir },
+        params: { page, limit, search, sort_by, sort_dir, filter_status },
         withCredentials: true
       });
 
@@ -103,7 +105,8 @@ const member = {
         activeTab: activeTab,
         search: search,
         sort_by: sort_by,
-        sort_dir: sort_dir
+        sort_dir: sort_dir,
+        filter_status: filter_status
       });
     } catch (error) {
       console.error('Dashboard error:', error);
@@ -117,7 +120,8 @@ const member = {
         activeTab: activeTab,
         search: search,
         sort_by: sort_by,
-        sort_dir: sort_dir
+        sort_dir: sort_dir,
+        filter_status: filter_status
       });
     }
   }
