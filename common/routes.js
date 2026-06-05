@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const auth = require('../modules/auth/member_auth_controller');
-const member = require('../modules/member/member_controller');
+const auth = require('../modules/auth/auth_controller');
+const profile = require('../modules/profile/profile_controller');
+const order = require('../modules/order/order_controller');
+const dashboard = require('../modules/dashboard/dashboard_controller');
 
 router.get("/login", (req, res) => {
   auth.login(req, res);
@@ -35,16 +37,16 @@ router.post("/process_change_password", async (req, res) => {
   auth.changePassword(req, res);
 });
 
-router.post("/process_cancel_order", async (req, res) => {
-  member.cancelOrder(req, res);
+router.post("/process_update_profile", async (req, res) => {
+  profile.updateProfile(req, res);
 });
 
-router.post("/process_update_profile", async (req, res) => {
-  member.updateProfile(req, res);
+router.post("/process_cancel_order", async (req, res) => {
+  order.cancelOrder(req, res);
 });
 
 router.get("/dashboard", async (req, res) => {
-  member.dashboard(req, res);
+  dashboard.index(req, res);
 });
 
 router.get("/", (req, res) => {
