@@ -530,7 +530,7 @@
 
         if (data.status === 'success') {
           editMsg.style.display = 'block'; editMsg.style.background = '#d4edda'; editMsg.style.color = '#155724';
-          editMsg.textContent = 'Data berhasil disimpan. Mengarahkan ke halaman login...';
+          editMsg.textContent = 'Data berhasil disimpan. Silakan login lagi.';
           setTimeout(() => {
             window.location.href = data.redirect || '/login';
           }, 2000);
