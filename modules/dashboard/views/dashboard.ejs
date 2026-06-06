@@ -489,8 +489,26 @@
     const editSaveBtn = document.getElementById('editSaveBtn');
     const editMsg = document.getElementById('edit-message');
 
+    let initialValues = {};
+
+    function updateSaveButton() {
+      const nama = document.getElementById('editNama').value.trim();
+      const email = document.getElementById('editEmail').value.trim();
+      const no_wa = document.getElementById('editWa').value.trim();
+      const changed = nama !== initialValues.nama || email !== initialValues.email || no_wa !== initialValues.no_wa;
+      editSaveBtn.disabled = !changed;
+      editSaveBtn.textContent = changed ? 'Simpan' : 'Tidak ada perubahan';
+      editSaveBtn.style.opacity = changed ? '1' : '0.5';
+    }
+
     editBtn.addEventListener('click', () => {
       editModal.classList.add('active');
+      initialValues = {
+        nama: document.getElementById('editNama').value.trim(),
+        email: document.getElementById('editEmail').value.trim(),
+        no_wa: document.getElementById('editWa').value.trim()
+      };
+      updateSaveButton();
     });
 
     editCancelBtn.addEventListener('click', () => {
@@ -501,6 +519,10 @@
       if (e.target === editModal) {
         editModal.classList.remove('active');
       }
+    });
+
+    ['editNama', 'editEmail', 'editWa'].forEach(id => {
+      document.getElementById(id).addEventListener('input', updateSaveButton);
     });
 
     editForm.addEventListener('submit', async (e) => {
