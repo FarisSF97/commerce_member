@@ -9,7 +9,8 @@ const profile = {
     }
 
     const account_id = req.session.user.id;
-    const { nama, email, no_wa } = req.body;
+    const { nama, email, no_wa: rawNoWa } = req.body;
+    const no_wa = (rawNoWa || '').trim();
 
     if (!nama && !email && !no_wa) {
       return res.status(400).json({ status: 'failed', message: 'Tidak ada data yang diubah' });
