@@ -10,10 +10,11 @@ app.use(express.json());
 
 app.use(
   session({
+    name: "member.sid",
     secret: process.env.SESSION_SECRET || "default-secret-change-in-production",
-    resave: false,
+    resave: true,
     saveUninitialized: false,
-    cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 },
+    cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000, sameSite: "lax" },
   }),
 );
 
