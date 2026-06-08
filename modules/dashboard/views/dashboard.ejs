@@ -266,7 +266,7 @@
       <form id="changePasswordForm" style="max-width: 400px;">
         <div style="margin-bottom: 16px;">
           <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #333; font-size: 14px;">Password Baru</label>
-          <input type="password" id="newPassword" placeholder="Minimal 4 karakter" minlength="4" required style="width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px;">
+          <input type="password" id="newPassword" placeholder="Masukkan password baru" minlength="4" required style="width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px;">
         </div>
         <div style="margin-bottom: 16px;">
           <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #333; font-size: 14px;">Konfirmasi Password</label>
@@ -444,7 +444,7 @@
 
       if (newPassword !== confirmPassword) {
         msg.style.display = 'block'; msg.style.background = '#f8d7da'; msg.style.color = '#721c24';
-        msg.textContent = 'Password tidak cocok!'; return;
+        msg.textContent = 'Password tidak sama!'; return;
       }
 
       if (newPassword.length < 4) {
