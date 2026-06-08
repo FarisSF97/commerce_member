@@ -413,13 +413,14 @@
         <tr><td>Harga</td><td id="od-harga">-</td></tr>
         <tr><td>Jumlah</td><td id="od-qty">-</td></tr>
         <tr><td>Subtotal</td><td id="od-subtotal">-</td></tr>
-        <tr><td>Diskon</td><td id="od-diskon">-</td></tr>
+        <tr><td>Kode Voucher</td><td id="od-kodevoucher">-</td></tr>
+        <tr><td>Potongan</td><td id="od-potongan">-</td></tr>
         <tr><td>Kode Unik</td><td id="od-kodeunik">-</td></tr>
         <tr class="detail-divider"><td colspan="2"></td></tr>
         <tr class="detail-total"><td>Total</td><td id="od-total">-</td></tr>
         <tr><td>Status</td><td id="od-status">-</td></tr>
         <tr class="detail-divider"><td colspan="2"></td></tr>
-        <tr><td>Bank</td><td id="od-bank">-</td></tr>
+        <tr><td>Pembayaran</td><td id="od-bank">-</td></tr>
         <tr><td>No Rekening</td><td id="od-rekening">-</td></tr>
         <tr><td>Atas Nama</td><td id="od-atasnama">-</td></tr>
       </table>
@@ -589,7 +590,8 @@
       document.getElementById('od-harga').textContent = 'Rp' + (parseInt(order.harga) || 0).toLocaleString('id-ID');
       document.getElementById('od-qty').textContent = order.qty || '-';
       document.getElementById('od-subtotal').textContent = 'Rp' + (parseInt(order.subtotal) || 0).toLocaleString('id-ID');
-      document.getElementById('od-diskon').textContent = discount > 0 ? '-Rp' + discount.toLocaleString('id-ID') : 'Rp0';
+      document.getElementById('od-kodevoucher').textContent = order.kupon_kode || '-';
+      document.getElementById('od-potongan').textContent = discount > 0 ? '-Rp ' + discount.toLocaleString('id-ID') : 'Rp 0';
       document.getElementById('od-kodeunik').textContent = kodeUnik > 0 ? '-Rp' + kodeUnik.toLocaleString('id-ID') : 'Rp0';
       document.getElementById('od-total').textContent = 'Rp' + (parseInt(order.total) || 0).toLocaleString('id-ID');
       document.getElementById('od-status').textContent = statusMap[order.status] || order.status || '-';
