@@ -148,6 +148,24 @@
     .filter-btn.paid-btn.active { background: #155724; border-color: #155724; }
     .filter-btn.cancel-btn.active { background: #721c24; border-color: #721c24; }
 
+    .avatar-container {
+      display: flex; align-items: center; gap: 16px; margin-bottom: 24px;
+    }
+    .avatar-profile {
+      width: 80px; height: 80px; border-radius: 50%; object-fit: cover;
+      border: 3px solid #e0e0e0;
+    }
+    .avatar-profile-icon {
+      font-size: 80px; color: #ccc;
+    }
+    .avatar-upload-btn {
+      padding: 8px 20px; background: #007bff; color: white;
+      border: none; border-radius: 8px; font-size: 14px; font-weight: 600;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .avatar-upload-btn:hover { background: #0056b3; }
+    .avatar-upload-btn:disabled { background: #ccc; cursor: not-allowed; }
+
     .btn-edit {
       display: inline-block; margin-top: 20px; padding: 10px 24px;
       background: #007bff; color: white; border: none; border-radius: 8px;
@@ -246,6 +264,19 @@
     </div>
 
     <div class="tab-content <%= activeTab === 'info' ? 'active' : '' %>" id="tab-info">
+      <div class="avatar-container">
+        <% if (user.foto) { %>
+          <img src="<%= API_BASE_URL %><%= user.foto %>" class="avatar-profile" id="avatarPreview">
+        <% } else { %>
+          <i class="fas fa-user-circle avatar-profile-icon" id="avatarPreviewIcon"></i>
+          <img src="" class="avatar-profile" id="avatarPreview" style="display:none;">
+        <% } %>
+        <div>
+          <input type="file" id="avatarInput" accept="image/jpeg,image/png,image/gif,image/webp" style="display:none;">
+          <button class="avatar-upload-btn" id="avatarUploadBtn"><i class="fas fa-camera"></i> Ganti Foto</button>
+          <div id="avatarMessage" style="margin-top:8px;font-size:13px;color:#666;"></div>
+        </div>
+      </div>
       <div class="info-row">
         <span class="info-label">Nama</span>
         <span class="info-value"><%= user.name %></span>
@@ -624,6 +655,70 @@
 
     document.getElementById('orderDetailModal').addEventListener('click', function(e) {
       if (e.target === this) closeOrderDetail();
+    });
+
+    // Avatar upload
+    const avatarInput = document.getElementById('avatarInput');
+    const avatarUploadBtn = document.getElementById('avatarUploadBtn');
+    const avatarMsg = document.getElementById('avatarMessage');
+    const avatarPreview = document.getElementById('avatarPreview');
+    const avatarPreviewIcon = document.getElementById('avatarPreviewIcon');
+
+    avatarUploadBtn.addEventListener('click', function() {
+      avatarInput.click();
+    });
+
+    avatarInput.addEventListener('change', function() {
+      const file = this.files[0];
+      if (!file) return;
+
+      if (file.size > 2 * 1024 * 1024) {
+        avatarMsg.textContent = 'Ukuran foto maksimal 2MB';
+        avatarMsg.style.color = '#dc3545';
+        this.value = '';
+        return;
+      }
+
+      const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+      if (!validTypes.includes(file.type)) {
+        avatarMsg.textContent = 'Tipe file tidak didukung. Gunakan jpg, png, gif, atau webp.';
+        avatarMsg.style.color = '#dc3545';
+        this.value = '';
+        return;
+      }
+
+      avatarMsg.textContent = 'Mengupload...';
+      avatarMsg.style.color = '#666';
+
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        const base64 = e.target.result;
+
+        try {
+          const response = await fetch('/process_upload_avatar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ foto_base64: base64 }),
+            credentials: 'include'
+          });
+
+          const data = await response.json();
+          if (data.status === 'success') {
+            avatarPreview.src = '<%= API_BASE_URL %>' + data.data.foto;
+            avatarPreview.style.display = 'block';
+            if (avatarPreviewIcon) avatarPreviewIcon.style.display = 'none';
+            avatarMsg.textContent = 'Foto profil berhasil diperbarui!';
+            avatarMsg.style.color = '#155724';
+          } else {
+            avatarMsg.textContent = data.message || 'Gagal mengunggah foto';
+            avatarMsg.style.color = '#dc3545';
+          }
+        } catch (err) {
+          avatarMsg.textContent = 'Terjadi kesalahan. Silakan coba lagi.';
+          avatarMsg.style.color = '#dc3545';
+        }
+      };
+      reader.readAsDataURL(file);
     });
 
     // Cancel from modal detail
