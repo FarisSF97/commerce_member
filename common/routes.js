@@ -45,6 +45,10 @@ router.post("/process_cancel_order", async (req, res) => {
   order.cancelOrder(req, res);
 });
 
+router.post("/process_upload_avatar", async (req, res) => {
+  auth.uploadAvatar(req, res);
+});
+
 router.get("/dashboard", async (req, res) => {
   dashboard.index(req, res);
 });

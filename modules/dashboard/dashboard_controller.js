@@ -41,7 +41,8 @@ const dashboard = {
         search: search,
         sort_by: sort_by,
         sort_dir: sort_dir,
-        filter_status: filter_status
+        filter_status: filter_status,
+        API_BASE_URL: API_BASE_URL
       });
     } catch (error) {
       console.error('Dashboard error:', error);
@@ -56,7 +57,8 @@ const dashboard = {
         search: search,
         sort_by: sort_by,
         sort_dir: sort_dir,
-        filter_status: filter_status
+        filter_status: filter_status,
+        API_BASE_URL: API_BASE_URL
       });
     }
   }

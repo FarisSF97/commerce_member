@@ -152,6 +152,37 @@ const auth = {
         message: 'Terjadi kesalahan. Silakan coba lagi.'
       });
     }
+  },
+
+  uploadAvatar: async (req, res) => {
+    if (!req.session.user) {
+      return res.status(401).json({ status: 'failed', message: 'Silakan login terlebih dahulu' });
+    }
+
+    const { foto_base64 } = req.body;
+    if (!foto_base64) {
+      return res.status(400).json({ status: 'failed', message: 'Foto diperlukan' });
+    }
+
+    try {
+      const apiResponse = await axios.post(`${API_BASE_URL}/upload_avatar`, {
+        email: req.session.user.email,
+        foto_base64
+      }, { withCredentials: true });
+
+      if (apiResponse.data.status === 'success') {
+        req.session.user.foto = apiResponse.data.data.foto;
+        return res.json({ status: 'success', data: { foto: apiResponse.data.data.foto }, message: 'Foto profil berhasil diperbarui' });
+      }
+
+      return res.status(400).json({ status: 'failed', message: apiResponse.data.message || 'Gagal mengunggah foto' });
+    } catch (error) {
+      console.error('Upload avatar error:', error);
+      return res.status(error.response?.status || 500).json({
+        status: 'failed',
+        message: error.response?.data?.message || 'Gagal mengunggah foto profil'
+      });
+    }
   }
 };
 
