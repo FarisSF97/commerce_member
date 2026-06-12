@@ -4,6 +4,7 @@ const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:5100';
 
 const auth = {
   login: (req, res) => {
+    if (req.session.user) return res.redirect('/dashboard');
     res.render('auth/views/login');
   },
 
