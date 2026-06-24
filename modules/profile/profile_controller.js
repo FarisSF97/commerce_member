@@ -22,12 +22,13 @@ const profile = {
       }, { withCredentials: true });
 
       if (apiResponse.data.status === 'success') {
-        req.session.destroy((err) => {
-          if (err) {
-            console.error('Session destroy error:', err);
-          }
-        });
-        return res.json({ status: 'success', message: 'Data berhasil disimpan. Silakan cek email untuk aktivasi ulang.', redirect: '/login' });
+        const data = apiResponse.data.data || {};
+        if (req.session.user) {
+          if (data.nama) req.session.user.nama = data.nama;
+          if (data.email) req.session.user.email = data.email;
+          if (data.no_wa) req.session.user.no_wa = data.no_wa;
+        }
+        return res.json({ status: 'success', message: 'Data berhasil disimpan.' });
       } else {
         return res.status(400).json({ status: 'failed', message: apiResponse.data.message || 'Gagal update profil' });
       }
