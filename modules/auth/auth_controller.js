@@ -126,23 +126,34 @@ const auth = {
 
   changePassword: async (req, res) => {
     try {
-      const { password } = req.body;
+      const { password, current_password } = req.body;
       const user = req.session.user;
 
       if (!user || !user.email) {
         return res.status(401).json({ status: 'failed', message: 'Silakan login terlebih dahulu' });
       }
 
+      if (!current_password) {
+        return res.status(400).json({ status: 'failed', message: 'Password saat ini diperlukan' });
+      }
+
       if (!password || password.length < 4) {
-        return res.status(400).json({ status: 'failed', message: 'Password minimal 4 karakter' });
+        return res.status(400).json({ status: 'failed', message: 'Password baru minimal 4 karakter' });
       }
 
       const apiResponse = await axios.post(`${API_BASE_URL}/change_password`, {
         email: user.email,
-        password: password
+        current_password,
+        password
       }, {
         withCredentials: true
       });
+
+      if (apiResponse.data.status === 'success') {
+        req.session.destroy((err) => {
+          if (err) console.error('Session destroy error:', err);
+        });
+      }
 
       return res.json(apiResponse.data);
     } catch (error) {

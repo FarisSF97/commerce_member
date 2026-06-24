@@ -296,6 +296,10 @@
       <h3 style="margin-bottom: 20px; color: #495057;"><i class="fas fa-key"></i> Ubah Password</h3>
       <form id="changePasswordForm" style="max-width: 400px;">
         <div style="margin-bottom: 16px;">
+          <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #333; font-size: 14px;">Password Saat Ini</label>
+          <input type="password" id="currentPassword" placeholder="Masukkan password saat ini" required style="width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px;">
+        </div>
+        <div style="margin-bottom: 16px;">
           <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #333; font-size: 14px;">Password Baru</label>
           <input type="password" id="newPassword" placeholder="Masukkan password baru" minlength="4" required style="width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px;">
         </div>
@@ -467,6 +471,7 @@
     document.getElementById('changePasswordForm').addEventListener('submit', async function(e) {
       e.preventDefault();
 
+      const currentPassword = document.getElementById('currentPassword').value;
       const newPassword = document.getElementById('newPassword').value;
       const confirmPassword = document.getElementById('confirmPassword').value;
       const msg = document.getElementById('password-message');
@@ -474,9 +479,14 @@
 
       msg.style.display = 'none';
 
+      if (!currentPassword) {
+        msg.style.display = 'block'; msg.style.background = '#f8d7da'; msg.style.color = '#721c24';
+        msg.textContent = 'Password saat ini harus diisi!'; return;
+      }
+
       if (newPassword !== confirmPassword) {
         msg.style.display = 'block'; msg.style.background = '#f8d7da'; msg.style.color = '#721c24';
-        msg.textContent = 'Password tidak sama!'; return;
+        msg.textContent = 'Password baru tidak sama!'; return;
       }
 
       if (newPassword.length < 4) {
@@ -490,17 +500,14 @@
         const response = await fetch('/process_change_password', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ password: newPassword }),
+          body: JSON.stringify({ current_password: currentPassword, password: newPassword }),
           credentials: 'include'
         });
 
         const data = await response.json();
 
         if (data.status === 'success') {
-          msg.style.display = 'block'; msg.style.background = '#d4edda'; msg.style.color = '#155724';
-          msg.textContent = 'Password berhasil diubah!';
-          document.getElementById('newPassword').value = '';
-          document.getElementById('confirmPassword').value = '';
+          window.location.href = '/logout';
         } else {
           msg.style.display = 'block'; msg.style.background = '#f8d7da'; msg.style.color = '#721c24';
           msg.textContent = data.message || 'Gagal ubah password';
